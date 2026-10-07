@@ -1148,7 +1148,9 @@ function getTodoClass(item) {
     status === 'completed' ||
     status === 'completed!' ||
     status === 'done' ||
-    status === 'finished'
+    status === 'finished' ||
+    status === 'lokið' ||
+    status === 'lokið!'
   ) {
     return 'completed';
   }
@@ -1179,6 +1181,8 @@ function getTodoClass(item) {
 
     // Someone is working on it = light blue.
     if (
+      status === 'það er verið að vinna í þessu' ||
+      status === 'er í vinnslu' ||
       status.includes('working') ||
       status.includes('someone is working') ||
       status.includes('some one is working') ||
