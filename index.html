@@ -115,8 +115,13 @@ main{
   grid-row:1;
 }
 
-#stageTodoPanel{
-  grid-column:2 / span 2;
+#specialPanel{
+  grid-column:2;
+  grid-row:1;
+}
+
+#changesPanel{
+  grid-column:3;
   grid-row:1;
 }
 
@@ -757,19 +762,6 @@ main{
 }
 
 
-.stage-todo-list{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:6px;
-}
-
-@media (min-width: 2800px) {
-  .stage-todo-list{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:8px;
-  }
-}
-
-
 .todo-left{
   min-width:0;
 }
@@ -837,9 +829,14 @@ main{
     <div id="todo" class="todo-list"></div>
   </section>
 
-  <section class="panel" id="stageTodoPanel">
-    <h2>TODO - SVIÐSMENN</h2>
-    <div id="stageTodo" class="todo-list stage-todo-list"></div>
+  <section class="panel" id="specialPanel">
+    <h2>SÉRKRÖFUR</h2>
+    <div id="specials" class="specials"></div>
+  </section>
+
+  <section class="panel" id="changesPanel">
+    <h2>BREYTINGAR Á RÝMUM</h2>
+    <div id="changes" class="changes"></div>
   </section>
 
   <section class="panel" id="crewPanel">
@@ -978,36 +975,18 @@ async function loadData() {
     const data =
       await loadJSONP();
 
-    const allTodo =
-      data.todo || [];
-
-    const stageTodo =
-      allTodo.filter(item =>
-        String(item.whoDoing || '')
-          .toLocaleLowerCase('is-IS')
-          .includes('sviðsmenn')
-      );
-
-    const mainTodo =
-      allTodo.filter(item =>
-        !String(item.whoDoing || '')
-          .toLocaleLowerCase('is-IS')
-          .includes('sviðsmenn')
-      );
-
-    renderTodo(
-      mainTodo,
-      'todo',
-      'Engin önnur verkefni fyrir þennan dag.'
-    );
-
-    renderTodo(
-      stageTodo,
-      'stageTodo',
-      'Engin verkefni skráð á Sviðsmenn.'
-    );
-
+    renderTodo(data.todo || []);
     renderCrew(data.crew || []);
+
+    if (Object.prototype.hasOwnProperty.call(data, 'specialRequirements')) {
+      renderSpecialRequirements(data.specialRequirements || []);
+    } else {
+      const specialRoot = document.getElementById('specials');
+      specialRoot.innerHTML =
+        '<div class="empty">Sérkröfu-API er ekki uppfært.</div>';
+    }
+
+    renderChanges(data.roomChanges || []);
 
     status.textContent =
       'Updated ' +
@@ -1035,8 +1014,9 @@ async function loadData() {
       '</div>';
 
     document.getElementById('todo').innerHTML = errorHTML;
-    document.getElementById('stageTodo').innerHTML = errorHTML;
     document.getElementById('crew').innerHTML = errorHTML;
+    document.getElementById('specials').innerHTML = errorHTML;
+    document.getElementById('changes').innerHTML = errorHTML;
 
     status.textContent =
       'Data error';
@@ -1264,17 +1244,13 @@ function formatCompletedAt(value) {
 }
 
 
-function renderTodo(
-  items,
-  rootId = 'todo',
-  emptyText = 'Engin verkefni fyrir þennan dag.'
-) {
+function renderTodo(items) {
   const root =
-    document.getElementById(rootId);
+    document.getElementById('todo');
 
   if (!items.length) {
     root.innerHTML =
-      '<div class="empty">' + esc(emptyText) + '</div>';
+      '<div class="empty">Engin verkefni fyrir þennan dag.</div>';
     return;
   }
 
