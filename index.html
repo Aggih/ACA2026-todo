@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Arctic Circle 2026</title>
+<title>Arctic Circle Operations</title>
 
 <style>
 :root{
@@ -1505,9 +1505,14 @@ function renderChanges(items) {
         </div>
 
         <div class="change-detail">
-          ${esc(item.from)}
-          →
-          <b>${esc(item.to)}</b>
+          ${esc(
+            item.detail ||
+            (
+              item.from && item.to
+                ? item.from + ' → ' + item.to
+                : item.from || item.to || ''
+            )
+          )}
         </div>
 
       </div>
